@@ -5,12 +5,15 @@
 ;(set! *warn-on-infer* true)
 
 (def default-y 160)
+(def default-jumps 4)
 
 (defonce game (p/create-game 500 500))
 (defonce state (atom {:timeoutid 0
                       :bird-y default-y
                       :bird-v 0
-                      :bird-a 1
+                      :bird-a 1.5
+                      :remaining-jumps default-jumps
+                      :last-key nil
                       :pipes []}))
 
 (doto game
@@ -37,14 +40,22 @@
     :bird-y (calc-y bird-y bird-v bird-a)
     :bird-v (calc-v bird-v bird-a)))
 
+(defn handle-jump [] (when (< 0 (get-in @state [:remaining-jumps]))
+                       (swap! state update-in [:remaining-jumps] dec)
+                       (swap! state update-in [:bird-v] #(- 15))))
 ;If we are on the title screen a mouse click takes us to the next screen,
-;otherwise we minus the bird's y position to make it jump.
+;otherwise we minus the bird's velocity to make it jump.
 (events/listen js/window "mousedown"
                (fn [_]
                  (let [gme (p/get-screen game)]
                    (cond
                      (= gme title-screen) (p/set-screen game main-screen)
-                     (= gme main-screen) (swap! state update-in [:bird-v] #(- 12))))))
+                     (= gme main-screen) (handle-jump)))))
+
+               
+
+(events/listen js/window "key"
+               (fn [e] (swap! state update-in [:last-key] (.keyCode e))))
 
 ;Top and bottom pipes are generated together as the gap between them should
 ;always be the same.
@@ -96,7 +107,7 @@
       (js/clearInterval (:timeoutid @state)))
 
     (on-render [this]
-      (let [{:keys [bird-y pipe pipes]} @state
+      (let [{:keys [bird-y pipe pipes last-key remaining-jumps]} @state
             bird-img [:image {:name "Flappy_Bird.png" :width 60 :height 60 :x 200 :y bird-y}]]
 
         ;If the bird hits the ground or a pipe, return to the title screen and
@@ -106,6 +117,8 @@
             #_(swap! state update-in [:pipes] (fn [_] []))
             (swap! state update-in [:bird-y] (fn [_] default-y))
             (swap! state update-in [:bird-v] (fn [_] 0))
+                   
+            (swap! state update-in [:remaining-jumps] (fn [_] default-jumps))
             (p/set-screen game title-screen)))
 
         ; Make the bird fall!
@@ -120,6 +133,7 @@
         (p/render game
                   [[:image {:name "sky.png" :width 500 :height 500 :x 0 :y 0}]
                    [:image {:name "land.png" :width 500 :height 100 :x 0 :y 450}]
+                   [:text {:value (str "Last key: " last-key ", Remaining jumps: " remaining-jumps) :x 10 :y 490 :size 12 :font "Georgia"}]
                    bird-img])
 
         #_(p/render game pipes)))))
