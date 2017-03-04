@@ -1,4 +1,9 @@
 ## Introduction
 
-A play-cljs game in which ... well, that part is up to you. Do `boot run` to develop and `boot build` to compile a release version.
+A flappy bird clone in Faktor-IPS style.
+
+
+### Prior art
+
+This is a variant of Zach Oakes' flappy-bird clone from his [play-cljs examples](https://github.com/oakes/play-cljs-examples).
 
