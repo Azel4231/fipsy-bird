@@ -17,7 +17,7 @@
   (p/load-image "splash.png")
   (p/load-image "sky.png")
   (p/load-image "land.png")
-  (p/load-image "Flappy_Bird.png")
+  (p/load-image "fipsy_bird.png")
   (p/load-image "pipe.png")
   (p/load-image "pipedwn.png"))
 
@@ -97,7 +97,7 @@
 
     (on-render [this]
       (let [{:keys [bird-y pipe pipes]} @state
-            bird-img [:image {:name "Flappy_Bird.png" :width 60 :height 60 :x 200 :y bird-y}]]
+            bird-img [:image {:name "fipsy_bird.png" :width 60 :height 60 :x 200 :y bird-y}]]
 
         ;If the bird hits the ground or a pipe, return to the title screen and
         ;reset its position.
